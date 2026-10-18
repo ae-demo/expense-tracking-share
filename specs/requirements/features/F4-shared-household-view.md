@@ -18,14 +18,14 @@ Needs: F1.
 - F4.8 As a household member, I see the total spent this month in LKR at the top of the list.
 - F4.9 As a household member, I see how much each partner paid this month, in LKR, at the top of the list.
 - F4.10 As a household member, I open an expense from the list to see its details and bill. 
-- F4.11 As a household member, I see an expense my partner just added without signing in again. *assumed*
+- F4.11 As a household member, I see an expense my partner just added without signing in again.
 
 ## Decisions
 
 - The list shows both partners' expenses to both partners; nothing is private.
 - Amounts are converted to LKR as P4 requires.
-- The totals at the top follow the filters in use. *assumed*
-- The list is paged in groups of 50 expenses. *assumed*
+- The totals at the top follow the filters in use.
+- The list is paged in groups of 50 expenses.
 
 ## Out of Scope
 
