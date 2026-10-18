@@ -143,7 +143,16 @@ components:
         categoryName: { type: string }
         limitLkrCents: { type: integer, nullable: true, description: "the limit in force for the month; null when none" }
         spentLkrCents: { type: integer }
+        remainingLkrCents: { type: integer, nullable: true, description: "limit minus spent; negative when over the limit; null when there is no limit" }
         percentUsed: { type: integer, nullable: true, description: "null when there is no limit; above 80 and above 100 are highlighted" }
+    BudgetOverall:
+      type: object
+      required: [limitLkrCents, spentLkrCents, remainingLkrCents]
+      description: "Adds up the categories that have a limit; not a separate limit."
+      properties:
+        limitLkrCents: { type: integer }
+        spentLkrCents: { type: integer }
+        remainingLkrCents: { type: integer, description: "negative when over" }
     BudgetInput:
       type: object
       required: [limitLkrCents]
@@ -381,7 +390,7 @@ paths:
   /budgets:
     get:
       operationId: listBudgets
-      summary: "Every category's limit and spending for a month"
+      summary: "Every category's limit, spending and remainder for a month, with the overall remainder"
       security:
         - oauth2: [budgets:read-all]
       parameters:
@@ -396,6 +405,7 @@ paths:
                 required: [data]
                 properties:
                   data: { type: array, items: { $ref: '#/components/schemas/BudgetRow' } }
+                  overall: { $ref: '#/components/schemas/BudgetOverall' }
         '400': { $ref: '#/components/responses/BadRequest' }
         '401': { $ref: '#/components/responses/Unauthorized' }
   /budgets/{categoryId}:

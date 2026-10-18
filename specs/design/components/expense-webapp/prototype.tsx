@@ -76,6 +76,10 @@ function lkr(cents: number): string {
   return `LKR ${whole}.${rest}`;
 }
 
+function left(cents: number): string {
+  return cents < 0 ? `Over by ${lkr(-cents)}` : lkr(cents);
+}
+
 function bar(percent: number): string {
   const filled = Math.min(10, Math.round(percent / 10));
   return "█".repeat(filled) + "░".repeat(10 - filled);
@@ -119,6 +123,7 @@ function Expenses() {
   const all = useCollection<Expense>("expenses");
   const cats = useCollection<Category>("categories");
   const people = useCollection<Member>("members");
+  const limits = useCollection<Budget>("budgets");
   const [monthLabel, setMonthLabel] = useState("January 2026");
   const [category, setCategory] = useState("All categories");
   const [payer, setPayer] = useState("Either partner");
@@ -131,6 +136,15 @@ function Expenses() {
     .filter((e) => payer === "Either partner" || e.paidBy === payer)
     .filter((e) => text === "" || e.merchant.toLowerCase().includes(text) || e.note.toLowerCase().includes(text))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
+  const budgetRows = cats.items
+    .map((c) => {
+      const limit = limitFor(limits.items.find((b) => b.category === c.name), key);
+      const used = state === "state.empty" ? 0 : sum(all.items.filter((e) => e.category === c.name && e.date.startsWith(key)));
+      return { id: c.id, name: c.name, limit, remaining: limit - used };
+    })
+    .filter((r) => r.limit > 0);
+  const overallLimit = budgetRows.reduce((t, r) => t + r.limit, 0);
+  const overallRemaining = budgetRows.reduce((t, r) => t + r.remaining, 0);
   return (
     <Shell>
       <Heading
@@ -158,7 +172,33 @@ function Expenses() {
             icon="User"
           />
         ))}
+        <Stat
+          id="stat.budget-left"
+          label="Budget remaining"
+          value={left(overallRemaining)}
+          hint={`of ${lkr(overallLimit)} across categories with a limit`}
+          icon="Gauge"
+          tone={overallRemaining < 0 ? "error" : "default"}
+        />
       </StatGroup>
+      <Section id="section.budget-left" title="Budget remaining" count={budgetRows.length} subtitle={`For ${monthLabel}, by category. Categories with no limit are not listed.`}>
+        <Table
+          id="table.budget-left"
+          columns={["Category", { label: "Limit", kind: "number" }, { label: "Remaining", kind: "number" }, { label: "Status", kind: "status" }]}
+          rows={budgetRows.map((r) => ({
+            id: `budget-left.${r.id}`,
+            cells: [r.name, lkr(r.limit), left(r.remaining)],
+            status:
+              r.remaining < 0
+                ? { text: "Over budget", tone: "error" as const }
+                : r.remaining * 100 < r.limit * 20
+                  ? { text: "Over 80%", tone: "warning" as const }
+                  : { text: "On track", tone: "success" as const },
+            to: "screen.budgets",
+          }))}
+          empty={<EmptyState id="empty.budget-left" title="No budget limits" text="Set a limit on the Budgets screen to see what remains." actions={<Button id="btn.go-budgets" label="Open budgets" to="screen.budgets" />} />}
+        />
+      </Section>
       <Section id="section.expenses" title="Expenses" count={rows.length} subtitle="Newest first, 50 per page. You and your partner see the same list, and it refreshes when either of you adds one.">
         <Filters id="filters.expenses">
           <Field id="field.month" label="Month" type="select" options={MONTH_LABELS} value={monthLabel} onChange={setMonthLabel} />

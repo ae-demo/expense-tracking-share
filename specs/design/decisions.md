@@ -7,6 +7,7 @@
 - \[data-model\] A changed budget limit adds a row from the current month, so past months keep their limit. *assumed* (F6)
 - \[data-model\] Exchange rates are cached per currency and day. *assumed* (F4, F5, F6)
 - \[security\] Every household member holds the same permissions; there is one role. *assumed* (all)
+- \[expense-api\] The budgets list also returns each category's remainder and the overall remainder, so the expenses screen needs no second call. *assumed* (F6)
 - \[expense-api\] A list returns 50 expenses per page. *assumed* (F4)
 - \[expense-api\] An expense whose rate is unavailable is returned with no LKR amount and left out of totals. *assumed* (F4, F5, F6)
 - \[bill-reader\] The agent answers with one JSON object of the values it read, or an empty object when it cannot read the bill. *assumed* (F3)

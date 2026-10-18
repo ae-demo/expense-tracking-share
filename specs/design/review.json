@@ -12,14 +12,17 @@
           },
           "text": "I would prefer to see the remaining of budgets overall and each category",
           "createdAt": "2026-10-18T07:39:54.202Z",
-          "status": "sent",
+          "status": "addressed",
           "anchor": {
             "screenId": "screen.expenses",
             "roleId": "HouseholdMember",
             "stateId": "state.default",
             "elementIds": []
           },
-          "sentAt": "2026-10-18T07:42:19.738Z"
+          "sentAt": "2026-10-18T07:42:19.738Z",
+          "addressedAt": "2026-10-18T07:42:23.590Z",
+          "revision": 2,
+          "reply": "The household expenses screen now shows the overall budget remaining and a table of what remains for each category with a limit; this is a new story F6.9, and the overall figure adds up the category limits."
         }
       ]
     }

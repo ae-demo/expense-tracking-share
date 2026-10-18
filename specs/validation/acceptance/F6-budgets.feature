@@ -68,3 +68,21 @@ Feature: F6 Budgets
       Given "Transport" has the limit "5000.00" LKR and "5550.00" LKR was spent this month
       When Nadeesha opens the budgets
       Then "Transport" is highlighted as over budget, differently from over 80%
+
+  @story-F6.9
+  Rule: The household expenses list shows what remains of the budgets, overall and for each category
+
+    Scenario: Remaining by category and overall
+      Given in January 2026 "Groceries" has the limit "15000.00" LKR with "12500.00" LKR spent and "Utilities" has the limit "10000.00" LKR with "6900.00" LKR spent
+      When Nadeesha views the household expenses for January 2026
+      Then "Groceries" shows "LKR 2,500.00" remaining, "Utilities" shows "LKR 3,100.00" remaining and the overall remaining is "LKR 5,600.00"
+
+    Scenario: A category past its limit shows as over
+      Given in January 2026 "Transport" has the limit "5000.00" LKR with "5550.00" LKR spent
+      When Nadeesha views the household expenses for January 2026
+      Then "Transport" shows it is over by "LKR 550.00"
+
+    Scenario: A category with no limit is not listed
+      Given in January 2026 "Health" has no limit
+      When Nadeesha views the household expenses for January 2026
+      Then the remaining budgets do not list "Health"
