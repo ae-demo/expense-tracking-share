@@ -24,6 +24,7 @@ Needs: F1, F2.
 - Each upload is limited to 10 MB.
 - The suggested category is one of the existing categories, or Other.
 - Each upload makes one expense.
+- Yes, a 5 MB limit
 
 ## Out of Scope
 
@@ -31,8 +32,4 @@ Needs: F1, F2.
 - Reading bills received by email.
 
 ## Open Questions
-
-1. The bill-reading agent can take files of up to 5 MB each, not the 10 MB decided above. The design uses 5 MB. Is that acceptable?
-   - Yes, a 5 MB limit
-   - No, 10 MB is needed (a different reading approach is required)
 

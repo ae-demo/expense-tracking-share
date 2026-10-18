@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "artifacts": [
+    {
+      "path": "specs/design/components/expense-webapp/prototype.json",
+      "comments": [
+        {
+          "id": "85a14a34-bf4a-4acd-93f3-ca550f6482a6",
+          "author": {
+            "id": "01a0a3ad-3e00-7ba5-97d2-845e18432714",
+            "name": "Joseph Fonseka"
+          },
+          "text": "I would prefer to see the remaining of budgets overall and each category",
+          "createdAt": "2026-10-18T07:39:54.202Z",
+          "status": "draft",
+          "anchor": {
+            "screenId": "screen.expenses",
+            "roleId": "HouseholdMember",
+            "stateId": "state.default",
+            "elementIds": []
+          }
+        }
+      ]
+    }
+  ]
+}
