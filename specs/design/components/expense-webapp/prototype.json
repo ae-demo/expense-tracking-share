@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 3,
+  "name": "Household Expense Tracker",
+  "entryScreen": "screen.expenses",
+  "roles": [{ "id": "HouseholdMember", "name": "Household member" }],
+  "states": [
+    { "id": "state.default", "name": "Default" },
+    { "id": "state.empty", "name": "Nothing to show" },
+    { "id": "state.validation-error", "name": "Validation errors" },
+    { "id": "state.failed", "name": "Something failed" },
+    { "id": "state.delayed", "name": "Slow bill reading" }
+  ],
+  "screens": [
+    { "id": "screen.expenses", "name": "Household expenses", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.expense-detail", "name": "Expense detail", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.expense-new", "name": "Add expense", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.expense-edit", "name": "Edit expense", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.bill-upload", "name": "Upload a bill", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.bill-review", "name": "Review bill", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.categories", "name": "Categories", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.budgets", "name": "Budgets", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.reports", "name": "Monthly report", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.account", "name": "Account", "roleIds": ["HouseholdMember"] },
+    { "id": "screen.signed-out", "name": "Signed out", "roleIds": ["HouseholdMember"] }
+  ],
+  "flows": [
+    { "id": "flow.household-view", "name": "See the household's expenses", "roleId": "HouseholdMember",
+      "screenIds": ["screen.expenses", "screen.expense-detail"] },
+    { "id": "flow.add-expense", "name": "Add an expense", "roleId": "HouseholdMember",
+      "screenIds": ["screen.expenses", "screen.expense-new"] },
+    { "id": "flow.edit-expense", "name": "Edit or delete an expense", "roleId": "HouseholdMember",
+      "screenIds": ["screen.expenses", "screen.expense-detail", "screen.expense-edit"] },
+    { "id": "flow.upload-bill", "name": "Record an expense from a bill", "roleId": "HouseholdMember",
+      "screenIds": ["screen.expenses", "screen.bill-upload", "screen.bill-review"] },
+    { "id": "flow.categories", "name": "Manage categories", "roleId": "HouseholdMember",
+      "screenIds": ["screen.categories"] },
+    { "id": "flow.budgets", "name": "Set monthly budgets", "roleId": "HouseholdMember",
+      "screenIds": ["screen.budgets"] },
+    { "id": "flow.monthly-report", "name": "See a month's total", "roleId": "HouseholdMember",
+      "screenIds": ["screen.reports"] }
+  ]
+}
