@@ -14,7 +14,7 @@ Needs: F1, F2.
 - F6.4 As a household member, I see each category's spent amount against its limit, with a progress bar, for a month.
 - F6.5 As a household member, I see a category highlighted when its spending passes 80% of its limit.
 - F6.6 As a household member, I see a category highlighted differently when its spending passes 100% of its limit.
-- F6.7 As a household member, I pick the month to see, and the current month is shown first. *assumed*
+- F6.7 As a household member, I pick the month to see, and the current month is shown first.
 - F6.8 As a household member, I see the budgets my partner set, and can change them.
 
 ## Decisions
@@ -22,8 +22,8 @@ Needs: F1, F2.
 - A budget is a monthly limit per category, in LKR.
 - A limit repeats every month until it is changed.
 - Spending is compared to limits in LKR as P4 requires.
-- Changing a limit applies from the current month on, and past months keep the limit they had. *assumed*
-- Categories with no limit show spending without a bar. *assumed*
+- Changing a limit applies from the current month on, and past months keep the limit they had.
+- Categories with no limit show spending without a bar.
 
 ## Out of Scope
 

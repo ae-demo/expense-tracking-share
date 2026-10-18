@@ -15,10 +15,11 @@ Household members group expenses into categories such as groceries or rent.
 ## Decisions
 
 - Every expense has a category; an expense with no category chosen falls under Other.
-- Deleting a category moves its expenses to Other. *assumed*
-- Other cannot be deleted. *assumed*
-- Category names are unique, ignoring upper and lower case. *assumed*
+- Deleting a category moves its expenses to Other.
+- Other cannot be deleted.
+- Category names are unique, ignoring upper and lower case.
 
 ## Out of Scope
 
 - Sub-categories.
+
