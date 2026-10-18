@@ -21,10 +21,9 @@ Needs: F1, F2.
 - Nothing is saved until the member confirms.
 - The saved expense keeps the bill and shows it as its attachment.
 - Bill files are stored in object storage. \[org default\]
-- Each upload is limited to 10 MB.
+- Each upload is limited to 5 MB, the most the bill-reading agent can take.
 - The suggested category is one of the existing categories, or Other.
 - Each upload makes one expense.
-- Yes, a 5 MB limit
 
 ## Out of Scope
 

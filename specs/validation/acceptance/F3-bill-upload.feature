@@ -17,7 +17,7 @@ Feature: F3 Bill upload
     @negative
     Scenario: A file over the size limit is not accepted
       Given Nadeesha is signed in
-      When she tries to upload a photo of 8 MB
+      When she tries to upload a photo of 6 MB
       Then no expense is started and the household list has the same expenses as before
 
   @story-F3.2
