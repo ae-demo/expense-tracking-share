@@ -1,0 +1,26 @@
+title Household Expense Tracker
+
+component expense-webapp as "Expense Web App" web-application
+component expense-api as "Expense API" service
+component bill-reader as "Bill Reader Agent" ai-agent
+component expense-db as "Expense Database" database
+component memory-db as "Conversation Store" database
+
+east user-auth as "Thunder Auth" identity-server
+south aws-s3 as "Bill Storage" service
+south currency-service as "Currency Service" service
+
+north -> expense-webapp
+north -> expense-api
+north -> bill-reader
+
+expense-webapp -> expense-api
+expense-webapp -> bill-reader
+expense-webapp -> user-auth
+expense-api -> user-auth
+expense-api -> expense-db
+expense-api -> aws-s3
+expense-api -> currency-service
+bill-reader -> user-auth
+bill-reader -> expense-api
+bill-reader -> memory-db

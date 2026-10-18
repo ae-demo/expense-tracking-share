@@ -1,0 +1,12 @@
+{
+  "name": "currency-service",
+  "resource": {
+    "name": "currency-service",
+    "description": "Gives the exchange rate from any offered currency to LKR, so every total, report and budget is shown in LKR."
+  },
+  "suggestions": [
+    { "name": "Open Exchange Rates", "description": "Wide currency list including LKR; free tier is limited." },
+    { "name": "ExchangeRate-API", "description": "Simple REST rates with a free tier; covers LKR." },
+    { "name": "Fixer", "description": "Rates for many currencies; paid plans for frequent use." }
+  ]
+}
