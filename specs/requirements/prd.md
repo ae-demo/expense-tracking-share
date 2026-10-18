@@ -30,4 +30,5 @@ See [Product-wide](product-wide.md).
 - Settling up or tracking who owes whom between the two partners.
 - Users beyond the two partners (no other family members).
 - Bank import.
+- Exporting reports.
 
