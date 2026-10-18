@@ -22,6 +22,7 @@ A household member adds, edits and deletes expenses with amount, currency, date,
 - The currency defaults to the one used for the last expense.
 - An attached bill image is stored in object storage. \[org default\]
 - Deleting an expense removes it for good, after a confirmation.
+- The currencies offered are LKR, USD, EUR, GBP, INR, AUD, SGD and AED. *assumed*
 
 ## Out of Scope
 

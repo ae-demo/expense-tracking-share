@@ -1,0 +1,427 @@
+openapi: 3.0.3
+info:
+  title: Expense API
+  version: 0.1.0
+  description: "Household expenses, categories, budgets, bill upload links and the monthly report."
+servers:
+  - url: /
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: /oauth2/authorize
+          tokenUrl: /oauth2/token
+          scopes:
+            expenses:read-all: "See every expense, its bill and the household totals"
+            expenses:create: "Record an expense or start a bill upload"
+            expenses:manage: "Edit or delete any expense"
+            categories:read-all: "See every category"
+            categories:manage: "Add, rename or delete a category"
+            budgets:read-all: "See every category's limit and spending"
+            budgets:manage: "Set, change or remove a monthly limit"
+            reports:read-all: "See the household's total spent in a month"
+            members:read-all: "See both household members' names"
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: integer, description: "HTTP or application error code" }
+        message: { type: string, description: "short human-readable label" }
+        description: { type: string, description: "detailed explanation" }
+        moreInfo: { type: string, description: "URI to documentation" }
+    Member:
+      type: object
+      required: [id, displayName]
+      properties:
+        id: { type: string }
+        displayName: { type: string }
+    Category:
+      type: object
+      required: [id, name, isFallback]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        isFallback: { type: boolean, description: "true for Other, which cannot be deleted" }
+    CategoryInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, description: "unique, ignoring upper and lower case" }
+    Expense:
+      type: object
+      required: [id, amountCents, currency, expenseDate, categoryId, categoryName, paidById, paidByName]
+      properties:
+        id: { type: string }
+        amountCents: { type: integer, description: "minor units of the currency paid" }
+        currency: { type: string, description: "ISO 4217 code" }
+        amountLkrCents: { type: integer, nullable: true, description: "converted to LKR; null when no rate is available" }
+        expenseDate: { type: string, format: date }
+        merchant: { type: string }
+        note: { type: string }
+        categoryId: { type: string }
+        categoryName: { type: string }
+        paidById: { type: string }
+        paidByName: { type: string }
+        recordedById: { type: string }
+        billFileName: { type: string, nullable: true }
+        billViewUrl: { type: string, nullable: true, description: "short-lived link to view the bill; only on the single-expense read" }
+        createdAt: { type: string, format: date-time }
+    ExpenseInput:
+      type: object
+      required: [amountCents, currency, expenseDate]
+      properties:
+        amountCents: { type: integer, minimum: 1 }
+        currency: { type: string, enum: [LKR, USD, EUR, GBP, INR, AUD, SGD, AED] }
+        expenseDate: { type: string, format: date }
+        merchant: { type: string }
+        note: { type: string }
+        categoryId: { type: string, nullable: true, description: "Other when absent" }
+        paidById: { type: string, description: "the caller when absent" }
+        billKey: { type: string, nullable: true, description: "key returned by a bill upload" }
+        billFileName: { type: string, nullable: true }
+    ExpenseSummary:
+      type: object
+      required: [totalLkrCents, byPayer]
+      properties:
+        totalLkrCents: { type: integer, description: "total of the matching expenses in LKR; expenses with no rate are left out" }
+        byPayer:
+          type: array
+          items:
+            type: object
+            required: [memberId, displayName, totalLkrCents]
+            properties:
+              memberId: { type: string }
+              displayName: { type: string }
+              totalLkrCents: { type: integer }
+    ExpenseList:
+      type: object
+      required: [count, data, summary]
+      properties:
+        count: { type: integer, description: "total matching items" }
+        next: { type: string, nullable: true, description: "relative URI of the next page" }
+        previous: { type: string, nullable: true, description: "relative URI of the previous page" }
+        data: { type: array, items: { $ref: '#/components/schemas/Expense' } }
+        summary: { $ref: '#/components/schemas/ExpenseSummary' }
+    BillUploadRequest:
+      type: object
+      required: [fileName, contentType, sizeBytes]
+      properties:
+        fileName: { type: string }
+        contentType: { type: string, enum: [image/jpeg, image/png, application/pdf] }
+        sizeBytes: { type: integer, maximum: 5242880 }
+    BillUpload:
+      type: object
+      required: [billKey, uploadUrl, expiresInSeconds]
+      properties:
+        billKey: { type: string, description: "send as billKey when saving the expense" }
+        uploadUrl: { type: string, description: "short-lived link the browser uploads the file to" }
+        expiresInSeconds: { type: integer }
+    MonthlyReport:
+      type: object
+      required: [month, totalLkrCents, previousMonth, previousTotalLkrCents, days]
+      properties:
+        month: { type: string, description: "YYYY-MM" }
+        totalLkrCents: { type: integer }
+        previousMonth: { type: string, description: "YYYY-MM" }
+        previousTotalLkrCents: { type: integer }
+        days:
+          type: array
+          items:
+            type: object
+            required: [date, totalLkrCents]
+            properties:
+              date: { type: string, format: date }
+              totalLkrCents: { type: integer }
+    BudgetRow:
+      type: object
+      required: [categoryId, categoryName, spentLkrCents]
+      properties:
+        categoryId: { type: string }
+        categoryName: { type: string }
+        limitLkrCents: { type: integer, nullable: true, description: "the limit in force for the month; null when none" }
+        spentLkrCents: { type: integer }
+        percentUsed: { type: integer, nullable: true, description: "null when there is no limit; above 80 and above 100 are highlighted" }
+    BudgetInput:
+      type: object
+      required: [limitLkrCents]
+      properties:
+        limitLkrCents: { type: integer, minimum: 1, description: "applies from the current month on" }
+  responses:
+    BadRequest:
+      description: "The request is invalid."
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Unauthorized:
+      description: "Not signed in or not permitted."
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NotFound:
+      description: "No such record."
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Conflict:
+      description: "The change conflicts with existing data."
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, default: 20, maximum: 100 }
+    Offset:
+      name: offset
+      in: query
+      schema: { type: integer, default: 0 }
+    Month:
+      name: month
+      in: query
+      required: true
+      description: "YYYY-MM"
+      schema: { type: string, pattern: '^[0-9]{4}-[0-9]{2}$' }
+security:
+  - oauth2: []
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: "Liveness check"
+      security: []
+      responses:
+        '200': { description: "The service is up." }
+  /me:
+    get:
+      operationId: getMe
+      summary: "The signed-in member; records them on first sign-in"
+      responses:
+        '200':
+          description: "The caller."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Member' } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /household-members:
+    get:
+      operationId: listHouseholdMembers
+      summary: "Both household members"
+      security:
+        - oauth2: [members:read-all]
+      responses:
+        '200':
+          description: "The members who have signed in."
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Member' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /categories:
+    get:
+      operationId: listCategories
+      summary: "Every category"
+      security:
+        - oauth2: [categories:read-all]
+      responses:
+        '200':
+          description: "All categories, Other included."
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Category' } }
+              example:
+                data:
+                  - { id: cat-groceries, name: Groceries, isFallback: false }
+                  - { id: cat-other, name: Other, isFallback: true }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createCategory
+      summary: "Add a category"
+      security:
+        - oauth2: [categories:manage]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CategoryInput' } } }
+      responses:
+        '201':
+          description: "The new category."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Category' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /categories/{categoryId}:
+    parameters:
+      - { name: categoryId, in: path, required: true, schema: { type: string } }
+    patch:
+      operationId: updateCategory
+      summary: "Rename a category"
+      security:
+        - oauth2: [categories:manage]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CategoryInput' } } }
+      responses:
+        '200':
+          description: "The renamed category."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Category' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+    delete:
+      operationId: deleteCategory
+      summary: "Delete a category; its expenses move to Other"
+      security:
+        - oauth2: [categories:manage]
+      responses:
+        '204': { description: "Deleted." }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /expenses:
+    get:
+      operationId: listExpenses
+      summary: "Every expense, newest expense date first, with totals"
+      security:
+        - oauth2: [expenses:read-all]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+        - { name: month, in: query, description: "YYYY-MM", schema: { type: string } }
+        - { name: categoryId, in: query, schema: { type: string } }
+        - { name: paidById, in: query, schema: { type: string } }
+        - { name: q, in: query, description: "text in the merchant or note", schema: { type: string } }
+      responses:
+        '200':
+          description: "A page of expenses; the summary covers every matching expense, not only the page."
+          content: { application/json: { schema: { $ref: '#/components/schemas/ExpenseList' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      operationId: createExpense
+      summary: "Record an expense"
+      security:
+        - oauth2: [expenses:create]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ExpenseInput' } } }
+      responses:
+        '201':
+          description: "The saved expense."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Expense' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /expenses/{expenseId}:
+    parameters:
+      - { name: expenseId, in: path, required: true, schema: { type: string } }
+    get:
+      operationId: getExpense
+      summary: "One expense with a link to view its bill"
+      security:
+        - oauth2: [expenses:read-all]
+      responses:
+        '200':
+          description: "The expense."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Expense' } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateExpense
+      summary: "Edit any expense"
+      security:
+        - oauth2: [expenses:manage]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/ExpenseInput' } } }
+      responses:
+        '200':
+          description: "The edited expense."
+          content: { application/json: { schema: { $ref: '#/components/schemas/Expense' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteExpense
+      summary: "Delete any expense and its bill for good"
+      security:
+        - oauth2: [expenses:manage]
+      responses:
+        '204': { description: "Deleted." }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /bill-uploads:
+    post:
+      operationId: createBillUpload
+      summary: "Get a short-lived link to upload a bill file"
+      security:
+        - oauth2: [expenses:create]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/BillUploadRequest' } } }
+      responses:
+        '201':
+          description: "The upload link and the key to save with the expense."
+          content: { application/json: { schema: { $ref: '#/components/schemas/BillUpload' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /reports/monthly-totals:
+    get:
+      operationId: getMonthlyReport
+      summary: "Total spent in a month, the month before, and each day"
+      security:
+        - oauth2: [reports:read-all]
+      parameters:
+        - { $ref: '#/components/parameters/Month' }
+      responses:
+        '200':
+          description: "The month's report, in LKR; a month with no expenses has a total of zero."
+          content: { application/json: { schema: { $ref: '#/components/schemas/MonthlyReport' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /budgets:
+    get:
+      operationId: listBudgets
+      summary: "Every category's limit and spending for a month"
+      security:
+        - oauth2: [budgets:read-all]
+      parameters:
+        - { $ref: '#/components/parameters/Month' }
+      responses:
+        '200':
+          description: "One row per category, in LKR."
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/BudgetRow' } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /budgets/{categoryId}:
+    parameters:
+      - { name: categoryId, in: path, required: true, schema: { type: string } }
+    put:
+      operationId: setBudget
+      summary: "Set or change a category's monthly limit from this month on"
+      security:
+        - oauth2: [budgets:manage]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/BudgetInput' } } }
+      responses:
+        '200':
+          description: "The category's row for the current month."
+          content: { application/json: { schema: { $ref: '#/components/schemas/BudgetRow' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: removeBudget
+      summary: "Remove a category's limit from this month on"
+      security:
+        - oauth2: [budgets:manage]
+      responses:
+        '204': { description: "Removed; earlier months keep their limit." }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }

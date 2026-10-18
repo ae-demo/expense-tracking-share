@@ -15,6 +15,7 @@ Rules that apply to more than one feature.
 - Bill reading from an uploaded image is done by an agent that pre-fills the expense; the member confirms before it is saved.
 - Uploaded bill images are stored in object storage (aws-s3). \[org default\]
 - Currency conversion to LKR: an exchange-rate service is needed; no provider named yet.
+- The household is the two people in one household sign-in group; a partner appears in the who-paid choices after first signing in. *assumed*
 
 ## Open Questions
 

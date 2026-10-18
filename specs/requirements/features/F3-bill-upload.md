@@ -30,3 +30,9 @@ Needs: F1, F2.
 - Several expenses from one bill.
 - Reading bills received by email.
 
+## Open Questions
+
+1. The bill-reading agent can take files of up to 5 MB each, not the 10 MB decided above. The design uses 5 MB. Is that acceptable?
+   - Yes, a 5 MB limit
+   - No, 10 MB is needed (a different reading approach is required)
+
