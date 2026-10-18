@@ -9,7 +9,7 @@ A household member adds, edits and deletes expenses with amount, currency, date,
 - F1.1 As a household member, I add an expense with an amount, a currency, a date and a note.
 - F1.2 As a household member, I choose who paid, defaulting to myself or the other partner. Needs: F2.
 - F1.3 As a household member, I enter the merchant of an expense as free text.
-- F1.4 As a household member, I pick a category for an expense. Needs: F2.
+- F1.4 As a household member, I pick a category for an expense, or leave it as Other. Needs: F2.
 - F1.5 As a household member, I attach a bill image to an expense I record by hand.
 - F1.6 As a household member, I edit any expense, whoever recorded it.
 - F1.7 As a household member, I delete any expense, whoever recorded it.
